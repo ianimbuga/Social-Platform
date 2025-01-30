@@ -1,56 +1,42 @@
-// src/components/PostForm.js
-import React, { useState } from 'react';
-import axios from 'axios';
+import React, { useState } from "react";
+import axios from "axios";
 
-function PostForm() {
-    const [title, setTitle] = useState('');
-    const [content, setContent] = useState('');
+const PostForm = () => {
+  const [content, setContent] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    axios.post("http://localhost:5000/posts", {
+      content,
+      image_url: imageUrl,
+      user_id: 1, // Default user for simplicity
+    })
+    .then(() => {
+      setContent("");
+      setImageUrl("");
+    })
+    .catch((error) => console.error(error));
+  };
 
-        try {
-            const response = await axios.post('http://127.0.0.1:5000/posts', {
-                title,
-                content
-            });
-
-            if (response.status === 200) {
-                // Clear form and reload posts
-                setTitle('');
-                setContent('');
-                window.location.reload();
-            }
-        } catch (error) {
-            console.error('Error creating post:', error);
-        }
-    };
-
-    return (
-        <div>
-            <h3>Create a New Post</h3>
-            <form onSubmit={handleSubmit}>
-                <div>
-                    <label>Title:</label>
-                    <input
-                        type="text"
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                        required
-                    />
-                </div>
-                <div>
-                    <label>Content:</label>
-                    <textarea
-                        value={content}
-                        onChange={(e) => setContent(e.target.value)}
-                        required
-                    />
-                </div>
-                <button type="submit">Post</button>
-            </form>
-        </div>
-    );
-}
+  return (
+    <form onSubmit={handleSubmit} className="card">
+      <h3>Create a Post</h3>
+      <input
+        type="text"
+        value={content}
+        onChange={(e) => setContent(e.target.value)}
+        placeholder="What's on your mind?"
+      />
+      <input
+        type="text"
+        value={imageUrl}
+        onChange={(e) => setImageUrl(e.target.value)}
+        placeholder="Image URL"
+      />
+      <button type="submit">Post</button>
+    </form>
+  );
+};
 
 export default PostForm;
