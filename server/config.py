@@ -1,31 +1,29 @@
-# Standard library imports
-
-# Remote library imports
-from flask import Flask
-from flask_cors import CORS
-from flask_migrate import Migrate
-from flask_restful import Api
+import os
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import MetaData
+from flask_migrate import Migrate
+from flask_cors import CORS
 
-# Local imports
+# Initialize the extensions
+db = SQLAlchemy()
+migrate = Migrate()
 
-# Instantiate app, set attributes
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.json.compact = False
+class Config:
+    # Database URI (defaults to SQLite if not set in environment variable)
+    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', 'sqlite:///app.db')
+    
+    # Disable tracking of modifications for performance reasons
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    
+    # Secret key for session management (set in environment variable or default)
+    SECRET_KEY = os.getenv('SECRET_KEY', 'supersecretkey')
 
-# Define metadata, instantiate db
-metadata = MetaData(naming_convention={
-    "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
-})
-db = SQLAlchemy(metadata=metadata)
-migrate = Migrate(app, db)
-db.init_app(app)
+    # Enable debug mode for development
+    DEBUG = True
 
-# Instantiate REST API
-api = Api(app)
+    # Configure allowed origins for CORS (set to '*' to allow all by default)
+    CORS_ORIGINS = os.getenv('CORS_ORIGINS', '*')
 
-# Instantiate CORS
-CORS(app)
+    @staticmethod
+    def init_app(app):
+        # Initialize CORS with the allowed origins
+        CORS(app, origins=Config.CORS_ORIGINS)
