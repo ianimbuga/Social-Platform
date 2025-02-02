@@ -1,76 +1,46 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useState } from 'react';
+import { Link, useHistory } from 'react-router-dom';
 
 const Navbar = () => {
-  const styles = {
-    navbar: {
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-      padding: "15px 30px",
-      backgroundColor: "#1a1a2e",
-      color: "#fff",
-      boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-      position: "sticky",
-      top: 0,
-      zIndex: 1000,
-    },
-    title: {
-      fontSize: "22px",
-      fontWeight: "600",
-      color: "#e94560",
-    },
-    linksContainer: {
-      display: "flex",
-      gap: "20px",
-    },
-    link: {
-      textDecoration: "none",
-      color: "#fff",
-      fontSize: "16px",
-      fontWeight: "500",
-      padding: "8px 12px",
-      borderRadius: "5px",
-      transition: "background-color 0.3s ease, color 0.3s ease",
-    },
-    linkHover: {
-      backgroundColor: "#e94560",
-      color: "#fff",
-    },
-  };
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const history = useHistory();
 
-  const handleHover = (e, isHover) => {
-    if (isHover) {
-      e.target.style.backgroundColor = styles.linkHover.backgroundColor;
-      e.target.style.color = styles.linkHover.color;
+  useEffect(() => {
+    // Check if the user is authenticated by checking user_id in localStorage
+    const userId = localStorage.getItem('user_id');
+    if (userId) {
+      setIsAuthenticated(true);
     } else {
-      e.target.style.backgroundColor = "transparent";
-      e.target.style.color = "#fff";
+      setIsAuthenticated(false);
     }
+  }, []);
+
+  const handleLogout = () => {
+    // Remove user_id from localStorage to log the user out
+    localStorage.removeItem('user_id');
+    setIsAuthenticated(false);
+    history.push('/login');  // Redirect to the login page after logout
   };
 
   return (
-    <div style={styles.navbar}>
-      <h1 style={styles.title}>Social PlatForm</h1>
-      <div style={styles.linksContainer}>
-        <Link
-          to="/"
-          style={styles.link}
-          onMouseOver={(e) => handleHover(e, true)}
-          onMouseOut={(e) => handleHover(e, false)}
-        >
-          Users
-        </Link>
-        <Link
-          to="/posts"
-          style={styles.link}
-          onMouseOver={(e) => handleHover(e, true)}
-          onMouseOut={(e) => handleHover(e, false)}
-        >
-          Posts
-        </Link>
+    <nav className="navbar">
+      <div className="logo">
+        <Link to="/">SocialMedia</Link>
       </div>
-    </div>
+      <div className="links">
+        {isAuthenticated ? (
+          <>
+            <Link to="/">Home</Link>
+            <button onClick={handleLogout} className="logout-btn">Logout</button>
+          </>
+        ) : (
+          <>
+            <Link to="/login">Login</Link>
+            <Link to="/signup">Signup</Link>
+          </>
+        )}
+      </div>
+    </nav>
   );
 };
 
